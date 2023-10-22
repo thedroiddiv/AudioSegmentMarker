@@ -27,12 +27,9 @@ fun AudioSegmentMarker(
     }
     if (amplitudes.isNotEmpty()) {
         Row(Modifier.fillMaxWidth()) {
-            var windowOffset by remember { mutableStateOf(0F) }
             AudioWaveform(
                 amplitudes = amplitudes,
                 waveformBrush = SolidColor(Color.Red),
-                windowOffset = windowOffset,
-                onWindowSlide = { windowOffset = it }
             )
         }
     }

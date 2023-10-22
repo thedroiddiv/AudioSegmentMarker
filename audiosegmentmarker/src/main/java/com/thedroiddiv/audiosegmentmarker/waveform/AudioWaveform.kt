@@ -5,6 +5,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.icons.materialIcon
@@ -35,8 +36,8 @@ private val MinSpikeRadiusDp: Dp = 0.dp
 private val MaxSpikeRadiusDp: Dp = 12.dp
 
 private const val MinSpikeHeight: Float = 1F
-private const val DefaultGraphicsLayerAlpha: Float = 0.99F
 
+@Suppress("LocalVariableName")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AudioWaveform(
@@ -50,12 +51,10 @@ fun AudioWaveform(
     spikeRadius: Dp = 2.dp,
     spikePadding: Dp = 1.dp,
     amplitudes: List<Int>,
-    windowOffset: Float = 0F,
-    onWindowSlide: (Float) -> Unit,
-    onWindowSlideFinished: (() -> Unit)? = null,
     windowSize: Float = 0.2F
 ) {
     assert(windowSize in 0F..1F)
+
     val _spikeWidth = remember(spikeWidth) { spikeWidth.coerceIn(MinSpikeWidthDp, MaxSpikeWidthDp) }
     val _spikePadding =
         remember(spikePadding) { spikePadding.coerceIn(MinSpikePaddingDp, MaxSpikePaddingDp) }
@@ -71,76 +70,81 @@ fun AudioWaveform(
             minHeight = MinSpikeHeight,
             maxHeight = canvasSize.height.coerceAtLeast(MinSpikeHeight)
         )
-    }.map { animateFloatAsState(it, spikeAnimationSpec).value }
+    }.map { animateFloatAsState(it, spikeAnimationSpec, label = "spikes amplitude").value }
 
-    val density = LocalDensity.current
+    var windowOffset by remember { mutableStateOf(0F) }
+    val _windowOffset by animateFloatAsState(windowOffset, label = "window offset")
 
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .requiredHeight(48.dp)
-            .graphicsLayer(alpha = DefaultGraphicsLayerAlpha)
-            .pointerInteropFilter {
-                return@pointerInteropFilter when (it.action) {
-                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                        if (it.x in 0F..canvasSize.width) {
-                            val maximumWindowOffset = canvasSize.width.times(1 - windowSize)
-                            if(it.x in maximumWindowOffset..canvasSize.width) {
-
-                                onWindowSlide(maximumWindowOffset/canvasSize.width)
-                            } else {
-                                onWindowSlide(it.x/canvasSize.width)
-                            }
-                            true
-                        } else false
-                    }
-
-                    MotionEvent.ACTION_UP -> {
-                        onWindowSlideFinished?.invoke()
-                        true
-                    }
-
-                    else -> false
-                }
-            }
-            .then(modifier)
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        canvasSize = size
-        spikes = size.width / _spikeTotalWidth.toPx()
-        spikesAmplitudes.forEachIndexed { index, amplitude ->
-            drawRoundRect(
-                brush = waveformBrush,
-                topLeft = Offset(
-                    x = index * _spikeTotalWidth.toPx(),
-                    y = when (waveformAlignment) {
-                        WaveformAlignment.Top -> 0F
-                        WaveformAlignment.Bottom -> size.height - amplitude
-                        WaveformAlignment.Center -> size.height / 2F - amplitude / 2F
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .requiredHeight(48.dp)
+                .pointerInteropFilter {
+                    return@pointerInteropFilter when (it.action) {
+                        MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                            if (it.x in 0F..canvasSize.width) {
+                                val maximumWindowOffset = canvasSize.width.times(1 - windowSize)
+                                windowOffset = if (it.x in maximumWindowOffset..canvasSize.width) {
+                                    (maximumWindowOffset / canvasSize.width)
+                                } else {
+                                    (it.x / canvasSize.width)
+                                }
+                                true
+                            } else false
+                        }
+
+                        else -> false
                     }
-                ),
+                }
+                .then(modifier)
+        ) {
+            canvasSize = size
+            spikes = size.width / _spikeTotalWidth.toPx()
+            spikesAmplitudes.forEachIndexed { index, amplitude ->
+                drawRoundRect(
+                    brush = waveformBrush,
+                    topLeft = Offset(
+                        x = index * _spikeTotalWidth.toPx(),
+                        y = when (waveformAlignment) {
+                            WaveformAlignment.Top -> 0F
+                            WaveformAlignment.Bottom -> size.height - amplitude
+                            WaveformAlignment.Center -> size.height / 2F - amplitude / 2F
+                        }
+                    ),
+                    size = Size(
+                        width = _spikeWidth.toPx(),
+                        height = amplitude
+                    ),
+                    cornerRadius = CornerRadius(_spikeRadius.toPx(), _spikeRadius.toPx()),
+                    style = style
+                )
+            }
+
+            val windowWidth = canvasSize.width.times(windowSize)
+            val windowHeight = canvasSize.height
+
+            drawRoundRect(
+                brush = SolidColor(Color.Gray.copy(alpha = 0.5f)),
                 size = Size(
-                    width = _spikeWidth.toPx(),
-                    height = amplitude
+                    width = windowWidth,
+                    height = windowHeight
                 ),
-                cornerRadius = CornerRadius(_spikeRadius.toPx(), _spikeRadius.toPx()),
-                style = style
+                topLeft = Offset(
+                    x = canvasSize.width.times(_windowOffset),
+                    y = 0f
+                )
             )
         }
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .requiredHeight(48.dp)
+        ) {
 
-        val windowWidth = canvasSize.width.times(windowSize)
-        val windowHeight = canvasSize.height
-
-        drawRoundRect(
-            brush = SolidColor(Color.Gray.copy(alpha = 0.5f)),
-            size = Size(
-                width = windowWidth,
-                height = windowHeight
-            ),
-            topLeft = Offset(
-                x = canvasSize.width.times(windowOffset),
-                y = 0f
-            )
-        )
+        }
     }
 }
 
