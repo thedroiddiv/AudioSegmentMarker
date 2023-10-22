@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.thedroiddiv.audiosegmentmarker.data.AudioManager
 import com.thedroiddiv.audiosegmentmarker.waveform.AudioWaveform
 
@@ -25,12 +26,13 @@ fun AudioSegmentMarker(
         amplitudes = AudioManager.getAmplitudes(context, audioFilePath)
     }
     if (amplitudes.isNotEmpty()) {
-        
         Row(Modifier.fillMaxWidth()) {
+            var windowOffset by remember { mutableStateOf(0F) }
             AudioWaveform(
                 amplitudes = amplitudes,
-                onProgressChange = {},
-                waveformBrush = SolidColor(Color.Red)
+                waveformBrush = SolidColor(Color.Red),
+                windowOffset = windowOffset,
+                onWindowSlide = { windowOffset = it }
             )
         }
     }
