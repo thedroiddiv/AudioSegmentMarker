@@ -1,5 +1,6 @@
 package com.thedroiddiv.audiosegmentmarker.ui
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ fun AudioSegmentMarker(
             AudioWaveform(
                 amplitudes = amplitudes,
                 waveformBrush = SolidColor(Color.Red),
+                modifier = Modifier.border(2.dp, Color.Black)
             )
         }
     }

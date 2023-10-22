@@ -1,5 +1,6 @@
 package com.thedroiddiv.audiosegmentmarker.waveform
 
+import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
@@ -8,7 +9,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.material.icons.materialIcon
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -19,14 +19,9 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import com.thedroiddiv.audiosegmentmarker.waveform.model.AmplitudeType
-import com.thedroiddiv.audiosegmentmarker.waveform.model.WaveformAlignment
-import kotlin.math.abs
 
 private val MinSpikeWidthDp: Dp = 1.dp
 private val MaxSpikeWidthDp: Dp = 24.dp
@@ -44,10 +39,9 @@ fun AudioWaveform(
     modifier: Modifier = Modifier,
     style: DrawStyle = Fill,
     waveformBrush: Brush = SolidColor(Color.White),
-    waveformAlignment: WaveformAlignment = WaveformAlignment.Center,
     amplitudeType: AmplitudeType = AmplitudeType.Avg,
     spikeAnimationSpec: AnimationSpec<Float> = tween(500),
-    spikeWidth: Dp = 4.dp,
+    spikeWidth: Dp = 2.dp,
     spikeRadius: Dp = 2.dp,
     spikePadding: Dp = 1.dp,
     amplitudes: List<Int>,
@@ -63,6 +57,7 @@ fun AudioWaveform(
     val _spikeTotalWidth = remember(spikeWidth, spikePadding) { _spikeWidth + _spikePadding }
     var canvasSize by remember { mutableStateOf(Size(0f, 0f)) }
     var spikes by remember { mutableStateOf(0F) }
+
     val spikesAmplitudes = remember(amplitudes, spikes, amplitudeType) {
         amplitudes.toDrawableAmplitudes(
             amplitudeType = amplitudeType,
@@ -75,13 +70,25 @@ fun AudioWaveform(
     var windowOffset by remember { mutableStateOf(0F) }
     val _windowOffset by animateFloatAsState(windowOffset, label = "window offset")
 
+    val zoomedAmps = remember(amplitudes, spikes, amplitudeType, windowOffset) {
+        val start = amplitudes.size.times(windowOffset).toInt().coerceIn(0, amplitudes.size)
+        val end = amplitudes.size.times(windowOffset + windowSize).toInt().coerceIn(0, amplitudes.size)
+        amplitudes.subList(start, end).toDrawableAmplitudes(
+            amplitudeType = amplitudeType,
+            spikes = spikes.toInt(),
+            minHeight = MinSpikeHeight,
+            maxHeight = canvasSize.height.coerceAtLeast(MinSpikeHeight)
+        )
+    }
+
+
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .requiredHeight(48.dp)
+                .requiredHeight(96.dp)
                 .pointerInteropFilter {
                     return@pointerInteropFilter when (it.action) {
                         MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -103,47 +110,50 @@ fun AudioWaveform(
         ) {
             canvasSize = size
             spikes = size.width / _spikeTotalWidth.toPx()
+
             spikesAmplitudes.forEachIndexed { index, amplitude ->
                 drawRoundRect(
                     brush = waveformBrush,
                     topLeft = Offset(
                         x = index * _spikeTotalWidth.toPx(),
-                        y = when (waveformAlignment) {
-                            WaveformAlignment.Top -> 0F
-                            WaveformAlignment.Bottom -> size.height - amplitude
-                            WaveformAlignment.Center -> size.height / 2F - amplitude / 2F
-                        }
+                        y = (size.height / 2F - amplitude / 2F) / 2
                     ),
                     size = Size(
                         width = _spikeWidth.toPx(),
-                        height = amplitude
+                        height = amplitude / 2
                     ),
                     cornerRadius = CornerRadius(_spikeRadius.toPx(), _spikeRadius.toPx()),
                     style = style
                 )
             }
 
-            val windowWidth = canvasSize.width.times(windowSize)
-            val windowHeight = canvasSize.height
-
             drawRoundRect(
                 brush = SolidColor(Color.Gray.copy(alpha = 0.5f)),
                 size = Size(
-                    width = windowWidth,
-                    height = windowHeight
+                    width = size.width.times(windowSize),
+                    height = size.height / 2
                 ),
                 topLeft = Offset(
-                    x = canvasSize.width.times(_windowOffset),
+                    x = size.width.times(_windowOffset),
                     y = 0f
                 )
             )
-        }
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .requiredHeight(48.dp)
-        ) {
 
+            zoomedAmps.forEachIndexed { index, amplitude ->
+                drawRoundRect(
+                    brush = waveformBrush,
+                    topLeft = Offset(
+                        x = index * _spikeTotalWidth.toPx(),
+                        y = size.height / 2 + ((size.height / 2F - amplitude / 2F) / 2)
+                    ),
+                    size = Size(
+                        width = _spikeWidth.toPx(),
+                        height = amplitude / 2
+                    ),
+                    cornerRadius = CornerRadius(_spikeRadius.toPx(), _spikeRadius.toPx()),
+                    style = style
+                )
+            }
         }
     }
 }
