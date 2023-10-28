@@ -3,6 +3,7 @@ package com.thedroiddiv.audiosegmentmarker.ui
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,7 +20,9 @@ import com.thedroiddiv.audiosegmentmarker.waveform.AudioWaveform
 
 @Composable
 fun AudioSegmentMarker(
-    audioFilePath: String
+    audioFilePath: String,
+    markers: List<Float>,
+    onMarkerAdd: (Float) -> Unit
 ) {
     val context = LocalContext.current
     var amplitudes by remember { mutableStateOf(listOf<Int>()) }
@@ -30,8 +33,10 @@ fun AudioSegmentMarker(
         Row(Modifier.fillMaxWidth()) {
             AudioWaveform(
                 amplitudes = amplitudes,
-                waveformBrush = SolidColor(Color.Red),
-                modifier = Modifier.border(2.dp, Color.Black)
+                waveformBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                modifier = Modifier.border(2.dp, Color.Black),
+                markers = markers,
+                addMarker = onMarkerAdd
             )
         }
     }

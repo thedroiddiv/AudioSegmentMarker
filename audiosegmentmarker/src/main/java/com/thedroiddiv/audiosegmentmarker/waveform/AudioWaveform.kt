@@ -1,11 +1,11 @@
 package com.thedroiddiv.audiosegmentmarker.waveform
 
-import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceIn
@@ -45,7 +46,9 @@ fun AudioWaveform(
     spikeRadius: Dp = 2.dp,
     spikePadding: Dp = 1.dp,
     amplitudes: List<Int>,
-    windowSize: Float = 0.2F
+    windowSize: Float = 0.2F,
+    markers: List<Float>,
+    addMarker: (Float) -> Unit
 ) {
     assert(windowSize in 0F..1F)
 
@@ -137,12 +140,35 @@ fun AudioWaveform(
                 ),
                 cornerRadius = CornerRadius(_spikeRadius.toPx(), _spikeRadius.toPx())
             )
+
+            markers.forEachIndexed { _, loc ->
+                val xCoordinate = size.width.times(loc)
+                val height = size.height
+                drawRoundRect(
+                    brush = SolidColor(Color.Red),
+                    topLeft = Offset(
+                        x = xCoordinate,
+                        y = 0f
+                    ),
+                    size = Size(
+                        width = _spikeWidth.toPx(),
+                        height = height
+                    ),
+                    cornerRadius = CornerRadius(_spikeRadius.toPx(), _spikeRadius.toPx()),
+                )
+            }
         }
 
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .requiredHeight(48.dp)
+                .pointerInput(null) {
+                    detectTapGestures {
+                        val newMarker = (it.x / canvasSize.width) * windowSize + windowOffset
+                        addMarker(newMarker)
+                    }
+                }
         ) {
             zoomedAmps.forEachIndexed { index, amplitude ->
                 drawRoundRect(
@@ -157,6 +183,27 @@ fun AudioWaveform(
                     ),
                     style = style
                 )
+            }
+
+            markers.forEach { marker ->
+                // if marker lies within the window, then draw it
+                if (marker in windowOffset..(windowOffset + windowSize)) {
+                    val xCoordinate =
+                        size.width * ((marker - windowOffset) / (windowSize))
+
+                    drawRoundRect(
+                        brush = SolidColor(Color.Red),
+                        topLeft = Offset(
+                            x = xCoordinate,
+                            y = 0F
+                        ),
+                        size = Size(
+                            width = _spikeWidth.toPx(),
+                            height = size.height
+                        ),
+                        style = style
+                    )
+                }
             }
         }
     }
