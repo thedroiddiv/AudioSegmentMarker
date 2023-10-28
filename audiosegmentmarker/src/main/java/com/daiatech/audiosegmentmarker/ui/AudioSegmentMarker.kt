@@ -21,7 +21,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
@@ -47,7 +46,7 @@ fun AudioSegmentMarker(
 ) {
     val context = LocalContext.current
     var amplitudes by remember { mutableStateOf(listOf<Int>()) }
-    var duration by remember { mutableStateOf(0L) }
+    var durationMs by remember { mutableStateOf(0L) }
     var isPlaying by remember { mutableStateOf(false) }
     var progressMs by remember { mutableStateOf(0L) }
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
@@ -57,7 +56,7 @@ fun AudioSegmentMarker(
     LaunchedEffect(Unit) {
         val (amp, dur) = AudioManager.getAmplitudes(context, audioFilePath)
         amplitudes = amp
-        duration = dur
+        durationMs = dur
     }
 
     DisposableEffect(Unit) {
@@ -108,7 +107,7 @@ fun AudioSegmentMarker(
                 AudioPlayer(
                     isPlaying = isPlaying,
                     currentPosition = progressMs,
-                    durationMS = duration,
+                    durationMS = durationMs,
                     onPlay = {
                         if (!isPaused) {
                             val mediaItem = MediaItem.fromUri(audioFilePath)
@@ -131,7 +130,8 @@ fun AudioSegmentMarker(
                     waveformBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.border(2.dp, Color.Black),
                     markers = markers,
-                    addMarker = onMarkerAdd
+                    addMarker = onMarkerAdd,
+                    progress = if (durationMs == 0L) 0f else progressMs.toFloat().div(durationMs)
                 )
             }
         }

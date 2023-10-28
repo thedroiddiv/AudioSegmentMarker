@@ -46,6 +46,7 @@ fun AudioWaveform(
     spikeRadius: Dp = 2.dp,
     spikePadding: Dp = 1.dp,
     amplitudes: List<Int>,
+    progress: Float = 0f,
     windowSize: Float = 0.2F,
     markers: List<Float>,
     addMarker: (Float) -> Unit
@@ -146,6 +147,23 @@ fun AudioWaveform(
                 val height = size.height
                 drawRoundRect(
                     brush = SolidColor(Color.Red),
+                    topLeft = Offset(
+                        x = xCoordinate,
+                        y = 0f
+                    ),
+                    size = Size(
+                        width = _spikeWidth.toPx(),
+                        height = height
+                    ),
+                    cornerRadius = CornerRadius(_spikeRadius.toPx(), _spikeRadius.toPx()),
+                )
+            }
+
+            if(progress != 0f) {
+                val xCoordinate = size.width.times(progress)
+                val height = size.height
+                drawRoundRect(
+                    brush = SolidColor(Color.Blue),
                     topLeft = Offset(
                         x = xCoordinate,
                         y = 0f
