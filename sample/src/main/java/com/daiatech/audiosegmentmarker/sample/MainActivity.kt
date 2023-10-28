@@ -1,4 +1,4 @@
-package com.thedroiddiv.audiosegmentmarker.app
+package com.daiatech.audiosegmentmarker.sample
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -15,9 +15,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.thedroiddiv.audiosegmentmarker.app.ui.theme.AudioSegmentMarkerTheme
+import com.daiatech.audiosegmentmarker.sample.ui.theme.AudioSegmentMarkerTheme
 import com.thedroiddiv.audiosegmentmarker.ui.AudioSegmentMarker
-import kotlinx.coroutines.flow.DEFAULT_CONCURRENCY_PROPERTY_NAME
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.io.File

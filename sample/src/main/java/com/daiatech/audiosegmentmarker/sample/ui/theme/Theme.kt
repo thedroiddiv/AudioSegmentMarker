@@ -1,4 +1,4 @@
-package com.thedroiddiv.audiosegmentmarker.app.ui.theme
+package com.daiatech.audiosegmentmarker.sample.ui.theme
 
 import android.app.Activity
 import android.os.Build

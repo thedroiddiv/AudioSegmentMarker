@@ -16,5 +16,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AudioSegmentMarker"
-include(":app")
 include(":audiosegmentmarker")
+include(":sample")

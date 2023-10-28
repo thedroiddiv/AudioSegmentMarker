@@ -1,4 +1,4 @@
-package com.thedroiddiv.audiosegmentmarker.app.ui.theme
+package com.daiatech.audiosegmentmarker.sample.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

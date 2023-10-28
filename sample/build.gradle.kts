@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.thedroiddiv.audiosegmentmarker.app"
+    namespace = "com.daiatech.audiosegmentmarker.sample"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.thedroiddiv.audiosegmentmarker.app"
+        applicationId = "com.daiatech.audiosegmentmarker.sample"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
