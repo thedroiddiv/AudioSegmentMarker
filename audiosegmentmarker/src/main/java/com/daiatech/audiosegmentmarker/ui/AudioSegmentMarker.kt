@@ -1,4 +1,4 @@
-package com.thedroiddiv.audiosegmentmarker.ui
+package com.daiatech.audiosegmentmarker.ui
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
@@ -15,8 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.thedroiddiv.audiosegmentmarker.data.AudioManager
-import com.thedroiddiv.audiosegmentmarker.waveform.AudioWaveform
+import com.daiatech.audiosegmentmarker.data.AudioManager
+import com.daiatech.audiosegmentmarker.waveform.AudioWaveform
 
 @Composable
 fun AudioSegmentMarker(

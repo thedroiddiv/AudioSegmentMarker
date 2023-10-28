@@ -1,4 +1,4 @@
-package com.thedroiddiv.audiosegmentmarker.data
+package com.daiatech.audiosegmentmarker.data
 
 import android.content.Context
 import android.util.Log

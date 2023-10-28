@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.thedroiddiv.audiosegmentmarker"
+    namespace = "com.daiatech.audiosegmentmarker"
     compileSdk = 34
 
     defaultConfig {

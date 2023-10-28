@@ -1,4 +1,4 @@
-package com.thedroiddiv.audiosegmentmarker.waveform
+package com.daiatech.audiosegmentmarker.waveform
 
 import kotlin.math.ceil
 import kotlin.math.roundToInt

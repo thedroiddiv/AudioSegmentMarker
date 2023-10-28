@@ -16,7 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.daiatech.audiosegmentmarker.sample.ui.theme.AudioSegmentMarkerTheme
-import com.thedroiddiv.audiosegmentmarker.ui.AudioSegmentMarker
+import com.daiatech.audiosegmentmarker.ui.AudioSegmentMarker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.io.File

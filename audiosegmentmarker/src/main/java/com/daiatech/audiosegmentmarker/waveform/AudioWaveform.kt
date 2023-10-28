@@ -1,4 +1,4 @@
-package com.thedroiddiv.audiosegmentmarker.waveform
+package com.daiatech.audiosegmentmarker.waveform
 
 import android.view.MotionEvent
 import androidx.compose.animation.core.AnimationSpec
